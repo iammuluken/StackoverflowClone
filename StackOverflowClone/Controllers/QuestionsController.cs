@@ -1,31 +1,38 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using StackOverflowClone.Features.Questions.Commands;
+using StackOverflowClone.Features.Questions.Queries;
 using StackOverflowClone.Models;
+using StackOverflowClone.ViewModels;
 
 namespace StackOverflowClone.Controllers;
 
 public class QuestionsController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
 
-    public QuestionsController(ApplicationDbContext context)
+    public QuestionsController(IMediator mediator)
     {
-        _context = context;
+        _mediator = mediator;
     }
     
     // GET
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var query = new GetQuestionsQuery();
+        var questions = _mediator.Send(query);
+        return View(questions);
     }
 
     public IActionResult Details(int id)
     {
-        var question = _context.Questions.FirstOrDefault(q => q.Id == id);
-        if (question == null)
+        var query = new GetQuestionDetailQuery() { Id = id };
+        var questionDetail = _mediator.Send(query).Result;
+        if (questionDetail == null)
         {
             return NotFound();
         }
-        return View(question);
+        return View(questionDetail);
     }
 
     public IActionResult Create()
@@ -35,15 +42,18 @@ public class QuestionsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Question question)
+    public async Task<IActionResult> Create(CreateQuestionModel viewModel)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid) return View(viewModel);
+        var command = new CreateQuestionCommand()
         {
-            _context.Questions.Add(question);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(question);
+            Title = viewModel.Title,
+            Content = viewModel.Content,
+            UserId = "tempUserId"
+        };
+            
+        var questionId = await _mediator.Send(command);
+        return RedirectToAction(nameof(Details), new { id = questionId });
     }
   
 }

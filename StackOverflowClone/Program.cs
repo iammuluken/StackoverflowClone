@@ -7,7 +7,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
             options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
