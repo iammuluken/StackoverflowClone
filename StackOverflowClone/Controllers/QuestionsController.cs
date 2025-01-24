@@ -20,7 +20,7 @@ public class QuestionsController : Controller
     public async Task<IActionResult> Index()
     {
         var query = new GetQuestionsQuery();
-        var questions = _mediator.Send(query);
+        var questions = await _mediator.Send(query);
         return View(questions);
     }
 

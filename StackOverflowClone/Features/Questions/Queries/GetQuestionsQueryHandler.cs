@@ -16,7 +16,7 @@ public class GetQuestionsQueryHandler:IRequestHandler<GetQuestionsQuery, IEnumer
     public async Task<IEnumerable<QuestionListDto>> Handle(GetQuestionsQuery request, CancellationToken cancellationToken)
     {
         return await _context.Questions
-            .Include(q => q.UserId)
+            .Include(q => q.User)
             .Select(q => new QuestionListDto
             {
                 Id = q.Id,

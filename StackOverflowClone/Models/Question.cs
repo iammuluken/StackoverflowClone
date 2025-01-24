@@ -22,4 +22,6 @@ public class Question
     public int VoteCount { get; set; }
     
     public virtual ApplicationUser User { get; set; }
+    
+    
 }
